@@ -61,12 +61,12 @@ func TestCollisionSensitivityDoCommand(t *testing.T) {
 			}
 		}
 	}()
-	response, err := x.DoCommand(context.Background(), map[string]any{"set_collision_sensitivity": 5})
+	response, err := x.DoCommand(context.Background(), map[string]any{setCollisionSensitivityKey: 5})
 	test.That(t, err, test.ShouldBeNil)
-	test.That(t, response["collision_sensitivity"], test.ShouldEqual, 5)
-	response, err = x.DoCommand(context.Background(), map[string]any{"reset_collision_sensitivity": true})
+	test.That(t, response[collisionSensitivityKey], test.ShouldEqual, 5)
+	response, err = x.DoCommand(context.Background(), map[string]any{resetCollisionSensitivityKey: true})
 	test.That(t, err, test.ShouldBeNil)
-	test.That(t, response["collision_sensitivity"], test.ShouldEqual, baseline)
+	test.That(t, response[collisionSensitivityKey], test.ShouldEqual, baseline)
 	for _, level := range []byte{5, 3} {
 		test.That(t, (<-requests).reg, test.ShouldEqual, regMap["GetState"])
 		request := <-requests
@@ -74,16 +74,16 @@ func TestCollisionSensitivityDoCommand(t *testing.T) {
 		test.That(t, request.params, test.ShouldResemble, []byte{level})
 	}
 	for _, value := range []any{0, 6, -1, 2, 3.5, math.NaN(), math.Inf(1), "5", true, map[string]any{}} {
-		_, err := x.DoCommand(context.Background(), map[string]any{"set_collision_sensitivity": value})
+		_, err := x.DoCommand(context.Background(), map[string]any{setCollisionSensitivityKey: value})
 		test.That(t, err, test.ShouldNotBeNil)
 	}
 	test.That(t, len(requests), test.ShouldEqual, 0)
 	x.conf.Sensitivity = nil
-	_, err = x.DoCommand(context.Background(), map[string]any{"set_collision_sensitivity": 5.0})
+	_, err = x.DoCommand(context.Background(), map[string]any{setCollisionSensitivityKey: 5.0})
 	test.That(t, err, test.ShouldNotBeNil)
 	x.conf.Sensitivity = &baseline
 	_, done := x.opMgr.New(context.Background())
-	_, err = x.DoCommand(context.Background(), map[string]any{"set_collision_sensitivity": 5.0})
+	_, err = x.DoCommand(context.Background(), map[string]any{setCollisionSensitivityKey: 5.0})
 	test.That(t, err, test.ShouldNotBeNil)
 	done()
 	test.That(t, len(requests), test.ShouldEqual, 0)
@@ -95,11 +95,11 @@ func TestCollisionSensitivityDoCommand(t *testing.T) {
 	err = x.MoveToJointPositions(context.Background(), nil, nil)
 	test.That(t, err, test.ShouldNotBeNil)
 	test.That(t, (<-requests).reg, test.ShouldEqual, regMap["GetError"])
-	_, err = x.DoCommand(context.Background(), map[string]any{"reset_collision_sensitivity": true})
+	_, err = x.DoCommand(context.Background(), map[string]any{resetCollisionSensitivityKey: true})
 	test.That(t, err, test.ShouldNotBeNil)
 	test.That(t, (<-requests).reg, test.ShouldEqual, regMap["GetState"])
 	test.That(t, (<-requests).reg, test.ShouldEqual, regMap["GetError"])
-	_, err = x.DoCommand(context.Background(), map[string]any{"clear_error": true})
+	_, err = x.DoCommand(context.Background(), map[string]any{clearErrorKey: true})
 	test.That(t, err, test.ShouldBeNil)
 	test.That(t, (<-requests).reg, test.ShouldEqual, regMap["ClearError"])
 	test.That(t, (<-requests).reg, test.ShouldEqual, regMap["GetError"])
