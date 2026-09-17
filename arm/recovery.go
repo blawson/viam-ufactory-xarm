@@ -29,8 +29,9 @@ func (x *xArm) clearJointLimitError(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	// The controller's state 1 is moving; state 3 is an operator pause.
-	if len(status.params) < 2 || (status.params[1] != 2 && status.params[1] != 4) {
+	// Viam stops failed execution into state 3. Clearing its latched C23 does
+	// not enable motion; the caller still owns cancellation and replanning.
+	if len(status.params) < 2 || (status.params[1] != 2 && status.params[1] != 3 && status.params[1] != 4) {
 		return false, fmt.Errorf("controller is not stationary for joint-limit clearing: %v", status.params)
 	}
 	state, err = x.getErrorParams(ctx)

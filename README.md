@@ -186,7 +186,8 @@ Clears only controller C23 ([Joints Angle Exceed Limit](https://docs.api.ufactor
 Returns `{"cleared": true}` after verifying the fault is gone, or
 `{"cleared": false}` when no controller fault or warning exists. Refuses
 other faults, warnings, an active arm operation, manual mode, or controller
-states other than sleeping/stopped. A fault change before clearing or an
+states other than sleeping/paused/stopped. Viam pauses a failed execution, so
+its latched C23 can be cleared without enabling the arm. A fault change before clearing or an
 unsuccessful clear returns an error. The command must be the sole key and true.
 
 This command does not move or enable the arm, release a gripper, or replay a
